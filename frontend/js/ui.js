@@ -76,11 +76,12 @@ const UI = {
     const candidates = buildCandidates();
     for (const candidate of candidates) {
       if (candidate.endsWith('.png') || candidate.endsWith('.jpg')) {
-        return `角色照片/${candidate}`;
+        // 透過後端代理取得圖片，避免前端靜態站未包含圖片資源
+        return `${CONFIG.API_URL}/photo?name=${encodeURIComponent(candidate)}`;
       }
     }
 
-    return `角色照片/${characterId || 'default'}.png`;
+    return `${CONFIG.API_URL}/photo?name=${encodeURIComponent((characterId || 'default') + '.png')}`;
   },
 
   async initHomeView() {
