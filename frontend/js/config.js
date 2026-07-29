@@ -1,7 +1,7 @@
 // 配置常數
 const CONFIG = {
   // API 端點
-  API_URL: 'http://localhost:3001/api',
+  API_URL: 'https://identity-v-voting-backend.onrender.com/api',
   GOOGLE_CLIENT_ID: '664772780261-qe8emglh1efae8p1ep57d42lq4tl5bdo.apps.googleusercontent.com',
   
   // 冷卻時間（分鐘）
