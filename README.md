@@ -145,6 +145,16 @@ npx http-server
 
 如果你想讓前端連到後端，請把 `frontend/js/config.js` 中的 `API_URL` 改成後端實際網址。
 
+## 直接公開部署後端到 Render
+
+如果你要讓 GitHub Pages 網站也能登入，建議把後端部署到公開服務，例如 Render，然後把 `frontend/js/config.js` 的 `API_URL` 改成該公開後端網址。
+
+你可以參考 `DEPLOYMENT_RENDER.md` 的步驟，內容包含：
+- 建立 Render Web Service
+- 設定環境變數
+- 更新 Google Cloud Console callback URL
+- 修改 `frontend/js/config.js`
+
 ## API 端點
 
 ### 認證
