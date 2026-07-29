@@ -128,20 +128,22 @@ npx http-server
 
 ## GitHub Pages 部署
 
-此專案使用 GitHub Pages 部署前端靜態內容，後端仍需另行部署到可訪問的伺服器，例如 VPS、Heroku、Render 或其他雲端平台。
+此專案使用 GitHub Actions 將 `frontend/` 資料夾部署到 `gh-pages` 分支。
 
 部署步驟：
 
-1. 確保專案已提交並推送到 `main` 分支：
+1. 把本地變更提交到 `main`：
    ```bash
-   git add .
+   git add .github/workflows/gh-pages.yml
    git commit -m "Add GitHub Pages deployment workflow"
+   ```
+2. 推送到 GitHub：
+   ```bash
    git push origin main
    ```
-2. 開啟 GitHub 倉庫，進入 `Settings` > `Pages`，確認啟用 GitHub Pages。
-3. 自動部署將會把 `frontend/` 資料夾內容發佈至 GitHub Pages。
+3. 到 GitHub 倉庫設定中，將 Pages 來源設為 `gh-pages` 分支。
 
-> 注意：如果你要讓前端連接後端，後端必須部署到公開可訪問的地址，並在 `frontend/js/config.js` 中把 `API_URL` 改成後端實際網址。
+如果你想讓前端連到後端，請把 `frontend/js/config.js` 中的 `API_URL` 改成後端實際網址。
 
 ## API 端點
 
