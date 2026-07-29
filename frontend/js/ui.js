@@ -35,7 +35,7 @@ const UI = {
     const map = window.CHARACTER_IMAGE_MAP || {};
     const characterId = character.character_id;
     if (characterId && map[characterId]) {
-      return `/api/photo?name=${encodeURIComponent(map[characterId])}`;
+      return `${CONFIG.API_URL}/photo?name=${encodeURIComponent(map[characterId])}`;
     }
 
     const sanitize = (value) => {

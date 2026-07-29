@@ -126,6 +126,23 @@ npx http-server
 
 前端將在 `http://localhost:8000` 運行
 
+## GitHub Pages 部署
+
+此專案使用 GitHub Pages 部署前端靜態內容，後端仍需另行部署到可訪問的伺服器，例如 VPS、Heroku、Render 或其他雲端平台。
+
+部署步驟：
+
+1. 確保專案已提交並推送到 `main` 分支：
+   ```bash
+   git add .
+   git commit -m "Add GitHub Pages deployment workflow"
+   git push origin main
+   ```
+2. 開啟 GitHub 倉庫，進入 `Settings` > `Pages`，確認啟用 GitHub Pages。
+3. 自動部署將會把 `frontend/` 資料夾內容發佈至 GitHub Pages。
+
+> 注意：如果你要讓前端連接後端，後端必須部署到公開可訪問的地址，並在 `frontend/js/config.js` 中把 `API_URL` 改成後端實際網址。
+
 ## API 端點
 
 ### 認證
