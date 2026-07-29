@@ -134,7 +134,7 @@ const API = {
         return API.leaderboard._cache.survivor;
       }
       if (!force && API.leaderboard._cache.all) {
-        const data = API.leaderboard._cache.all.filter(item => item.camp === '瘙???);
+        const data = API.leaderboard._cache.all.filter(item => item.camp === 'survivor');
         API.leaderboard._cache.survivor = data;
         return data;
       }
@@ -147,7 +147,7 @@ const API = {
         return API.leaderboard._cache.hunter;
       }
       if (!force && API.leaderboard._cache.all) {
-        const data = API.leaderboard._cache.all.filter(item => item.camp === '??恣??);
+        const data = API.leaderboard._cache.all.filter(item => item.camp === 'hunter');
         API.leaderboard._cache.hunter = data;
         return data;
       }
