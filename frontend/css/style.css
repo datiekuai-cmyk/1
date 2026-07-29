@@ -1,4 +1,4 @@
-* {
+﻿* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -42,7 +42,7 @@ body {
   opacity: 0;
 }
 
-/* 登入畫面 */
+/* ?餃?恍 */
 .login-container {
   display: flex;
   flex-direction: column;
@@ -78,7 +78,7 @@ body {
   opacity: 0.8;
 }
 
-/* 標頭 */
+/* 璅 */
 .header {
   background-color: var(--secondary-color);
   padding: 15px 20px;
@@ -127,7 +127,7 @@ body {
   color: white;
 }
 
-/* 主要內容 */
+/* 銝餉??批捆 */
 .main-content {
   flex: 1;
   padding: 20px;
@@ -136,7 +136,7 @@ body {
   width: 100%;
 }
 
-/* 頁腳 */
+/* ? */
 .footer {
   background-color: var(--secondary-color);
   padding: 20px;
@@ -147,7 +147,7 @@ body {
   margin-top: auto;
 }
 
-/* 首頁分類 */
+/* 擐??? */
 .categories {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -179,7 +179,7 @@ body {
   font-size: 48px;
 }
 
-/* 排行榜預覽 */
+/* ??璁?閬?*/
 .leaderboard-preview {
   margin-top: 40px;
 }
@@ -258,7 +258,7 @@ body {
   transform: translateX(5px);
 }
 
-/* 角色網格 */
+/* 閫蝬脫 */
 .characters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -318,7 +318,7 @@ body {
   .character-card-subname { font-size: 12px; }
 }
 
-/* 角色詳情 */
+/* 閫閰單? */
 .character-detail {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -378,7 +378,7 @@ body {
   font-size: 16px;
 }
 
-/* 按鈕 */
+/* ?? */
 .btn-primary {
   padding: 12px 24px;
   background-color: var(--primary-color);
@@ -406,7 +406,7 @@ body {
   font-size: 18px;
 }
 
-/* 投票畫面 */
+/* ?巨?恍 */
 .voting-container {
   display: flex;
   flex-direction: column;
@@ -488,7 +488,7 @@ body {
   border-color: var(--error-color);
 }
 
-/* 結果容器 */
+/* 蝯?摰孵 */
 .result-container {
   text-align: center;
   padding: 40px 20px;
@@ -516,7 +516,7 @@ body {
   opacity: 0.8;
 }
 
-/* 冷卻時間 */
+/* ?瑕?? */
 .cooldown-container {
   display: flex;
   flex-direction: column;
@@ -538,7 +538,7 @@ body {
   color: var(--accent-color);
 }
 
-/* 排行榜 */
+/* ??璁?*/
 .leaderboard-tabs {
   display: flex;
   gap: 10px;
@@ -602,7 +602,7 @@ body {
   font-weight: bold;
 }
 
-/* 響應式設計 */
+/* ?踵?撘身閮?*/
 @media (max-width: 768px) {
   .header {
     flex-wrap: wrap;
@@ -644,3 +644,4 @@ body {
     font-size: 14px;
   }
 }
+

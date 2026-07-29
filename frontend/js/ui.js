@@ -1,4 +1,4 @@
-// UI 管理模組
+﻿// UI 蝞∠?璅∠?
 const UI = {
   currentView: null,
   currentCharacter: null,
@@ -26,7 +26,7 @@ const UI = {
   },
 
   updateUserInfo(name) {
-    document.getElementById('user-name').textContent = name || '使用者';
+    document.getElementById('user-name').textContent = name || '雿輻??;
   },
 
   getCharacterImagePath(character) {
@@ -41,7 +41,7 @@ const UI = {
     const sanitize = (value) => {
       if (!value) return '';
       return String(value)
-        .replace(/[“”‘’"'`\\/]/g, '')
+        .replace(/[??'`\\/]/g, '')
         .replace(/\s+/g, ' ')
         .trim();
     };
@@ -76,7 +76,7 @@ const UI = {
     const candidates = buildCandidates();
     for (const candidate of candidates) {
       if (candidate.endsWith('.png') || candidate.endsWith('.jpg')) {
-        // 透過後端代理取得圖片，避免前端靜態站未包含圖片資源
+        // ??敺垢隞??????嚗??蝡舫????芸??怠???皞?
         return `${CONFIG.API_URL}/photo?name=${encodeURIComponent(candidate)}`;
       }
     }
@@ -90,7 +90,7 @@ const UI = {
       document.getElementById('data-update-date').textContent = info.lastUpdate;
       this.loadLeaderboardPreview('all');
     } catch (err) {
-      error('初始化首頁失敗:', err);
+      error('?????仃??', err);
     }
   },
 
@@ -118,12 +118,12 @@ const UI = {
           <div class="leaderboard-rank">#${index + 1}</div>
           <div class="leaderboard-name">${item.profession}</div>
           <div class="leaderboard-subname">${item.manor_name}</div>
-          <div class="leaderboard-votes">${item.vote_count} 票</div>
+          <div class="leaderboard-votes">${item.vote_count} 蟡?/div>
         `;
         container.appendChild(element);
       });
     } catch (err) {
-      error('加載排行榜失敗:', err);
+      error('????璁仃??', err);
     }
   },
 
@@ -158,7 +158,7 @@ const UI = {
         container.appendChild(element);
       });
     } catch (err) {
-      error('加載排行榜失敗:', err);
+      error('????璁仃??', err);
     }
   },
 
@@ -167,7 +167,7 @@ const UI = {
       const data = await API.characters.getAll();
       const characters = camp === 'survivor' ? data.survivors : data.hunters;
 
-      const title = camp === 'survivor' ? '求生者' : '監管者';
+      const title = camp === 'survivor' ? '瘙??? : '??恣??;
       document.getElementById('character-list-title').textContent = title;
 
       const grid = document.getElementById('characters-grid');
@@ -192,7 +192,7 @@ const UI = {
 
       this.switchView('character-list');
     } catch (err) {
-      error('加載角色列表失敗:', err);
+      error('??閫?”憭望?:', err);
     }
   },
 
@@ -221,7 +221,7 @@ const UI = {
       this.checkAndUpdateCooldown();
       this.switchView('character-detail');
     } catch (err) {
-      error('加載角色詳情失敗:', err);
+      error('??閫閰單?憭望?:', err);
     }
   },
 
@@ -232,25 +232,25 @@ const UI = {
 
       if (cooldown.inCooldown) {
         btn.disabled = true;
-        btn.textContent = `冷卻中... ${cooldown.remainingSeconds}秒`;
+        btn.textContent = `?瑕銝?.. ${cooldown.remainingSeconds}蝘;
 
         let remaining = cooldown.remainingSeconds;
         const interval = setInterval(() => {
           remaining--;
-          btn.textContent = `冷卻中... ${remaining}秒`;
+          btn.textContent = `?瑕銝?.. ${remaining}蝘;
 
           if (remaining <= 0) {
             clearInterval(interval);
             btn.disabled = false;
-            btn.textContent = '開始投票';
+            btn.textContent = '???巨';
           }
         }, 1000);
       } else {
         btn.disabled = false;
-        btn.textContent = '開始投票';
+        btn.textContent = '???巨';
       }
     } catch (err) {
-      error('檢查冷卻時間失敗:', err);
+      error('瑼Ｘ?瑕??憭望?:', err);
     }
   },
 
@@ -279,7 +279,7 @@ const UI = {
       this.startTimer();
       this.switchView('voting');
     } catch (err) {
-      error('開始投票失敗:', err);
+      error('???巨憭望?:', err);
     }
   },
 
@@ -313,7 +313,7 @@ const UI = {
   },
 
   handleTimeUp() {
-    this.showResult(false, '時間已到！', '答案錯誤，請稍後再試');
+    this.showResult(false, '??撌脣嚗?, '蝑??航炊嚗?蝔??岫');
   },
 
   async submitAnswer(selectedAnswer) {
@@ -344,12 +344,12 @@ const UI = {
 
       this.showResult(
         result.isCorrect,
-        result.isCorrect ? '答對了！' : '答錯了',
+        result.isCorrect ? '蝑?鈭?' : '蝑鈭?,
         result.message,
         result.correctAnswer
       );
     } catch (err) {
-      error('提交答案失敗:', err);
+      error('?漱蝑?憭望?:', err);
     }
   },
 
@@ -362,7 +362,7 @@ const UI = {
     resultTitle.textContent = title;
     resultTitle.style.color = isCorrect ? 'var(--success-color)' : 'var(--error-color)';
     resultMsg.textContent = message;
-    resultDetail.textContent = isCorrect ? '' : `正確答案: ${correctAnswer}`;
+    resultDetail.textContent = isCorrect ? '' : `甇?Ⅱ蝑?: ${correctAnswer}`;
 
     resultContainer.classList.remove('hidden');
   },
@@ -378,9 +378,10 @@ const UI = {
         return;
       }
     } catch (err) {
-      error('更新冷卻時間失敗:', err);
+      error('?湔?瑕??憭望?:', err);
     }
 
     this.switchView('character-detail');
   }
 };
+
