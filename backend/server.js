@@ -8,7 +8,34 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.SERVER_PORT || 3001;
 const FRONTEND_PATH = path.join(__dirname, '../frontend');
-const PHOTO_PATH = path.join(__dirname, '../角色照片');
+
+// 多路徑嘗試：不同部署環境下 __dirname 與工作目錄可能不同，
+// 因此嘗試幾個候選目錄，使用第一個存在的作為照片資料夾。
+const candidatePhotoPaths = [
+  path.join(__dirname, '../角色照片'), // server 在 backend 且以 backend 為工作目錄
+  path.join(__dirname, '角色照片'),     // server 與角色照片同目錄
+  path.join(process.cwd(), '角色照片'), // 以執行目錄為基準
+  path.join(__dirname, '..', '角色照片'),
+  path.join(__dirname, '..', '..', '角色照片')
+];
+
+let PHOTO_PATH = null;
+for (const p of candidatePhotoPaths) {
+  try {
+    if (fs.existsSync(p)) {
+      PHOTO_PATH = p;
+      break;
+    }
+  } catch (e) {
+    // 忽略權限或其他檢查錯誤，繼續嘗試下一個
+  }
+}
+
+if (!PHOTO_PATH) {
+  // 最後備援：使用第一個候選路徑（即便不存在），以便錯誤訊息更明顯
+  PHOTO_PATH = candidatePhotoPaths[0];
+  console.warn('[WARN] 未找到角色照片資料夾，預設使用', PHOTO_PATH);
+}
 
 // 中間件
 app.use(cors({
