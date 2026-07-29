@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -24,7 +25,7 @@ app.get('/api/photo', (req, res, next) => {
   try {
     const decoded = decodeURIComponent(name);
     const filePath = path.join(PHOTO_PATH, decoded);
-    if (!require('fs').existsSync(filePath)) {
+    if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'not found' });
     }
     return res.sendFile(filePath, err => {
@@ -40,7 +41,10 @@ app.get('/api/photo', (req, res, next) => {
 });
 
 app.use('/角色照片', express.static(PHOTO_PATH));
-app.use(express.static(FRONTEND_PATH));
+
+if (fs.existsSync(FRONTEND_PATH)) {
+  app.use(express.static(FRONTEND_PATH));
+}
 
 // 路由
 app.use('/api/auth', require('./routes/auth'));
@@ -65,12 +69,14 @@ app.get('/api/info', (req, res) => {
 });
 
 // 如果不是 API 路由，就回傳前端 index.html
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  res.sendFile(path.join(FRONTEND_PATH, 'index.html'));
-});
+if (fs.existsSync(FRONTEND_PATH)) {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    res.sendFile(path.join(FRONTEND_PATH, 'index.html'));
+  });
+}
 
 // 錯誤處理
 app.use((err, req, res, next) => {
