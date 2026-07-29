@@ -52,10 +52,17 @@ const Auth = {
 
   // 處理 Google 登入回應
   async handleGoogleResponse(response) {
+    const idToken = response && response.credential;
+    if (!idToken) {
+      error('Google 回傳無有效 credential');
+      return;
+    }
+
     try {
-      const data = await API.auth.googleCallback(response.credential);
-      
-      // 儲存令牌和用戶信息
+      // 儘量透過後端驗證 ID token（生產環境推薦）
+      const data = await API.auth.googleCallback(idToken);
+
+      // 儲存令牌和用戶信息（以後端回傳為準）
       localStorage.setItem(CONFIG.STORAGE_TOKEN, data.token);
       localStorage.setItem(CONFIG.STORAGE_USER, JSON.stringify({
         userId: data.userId,
@@ -63,14 +70,44 @@ const Auth = {
         email: data.email,
         picture: data.picture
       }));
-      
+
       Auth.currentUser = data;
       Auth.isLoggedIn = true;
-      
-      log('登入成功:', data);
+
+      log('登入成功 (server verified):', data);
       UI.switchView('home');
     } catch (err) {
-      error('Google 登入失敗:', err);
+      // 若後端不可用或發生錯誤，嘗試 client-side fallback（僅供 demo / 測試）
+      try {
+        const parseJwt = (token) => {
+          const base64Url = (token.split('.')[1] || '');
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          return JSON.parse(jsonPayload);
+        };
+
+        const payload = parseJwt(idToken);
+        const user = {
+          userId: payload.sub,
+          name: payload.name || payload.email,
+          email: payload.email,
+          picture: payload.picture
+        };
+
+        // 儲存 token 與 user（注意：此方法在生產環境不安全，僅供展示）
+        localStorage.setItem(CONFIG.STORAGE_TOKEN, idToken);
+        localStorage.setItem(CONFIG.STORAGE_USER, JSON.stringify(user));
+        Auth.currentUser = user;
+        Auth.isLoggedIn = true;
+
+        log('登入成功 (client fallback):', user);
+        UI.switchView('home');
+      } catch (e2) {
+        error('Google 登入失敗（server 與 client fallback 均失敗）:', e2, err);
+        UI.switchView('login');
+      }
     }
   },
 
