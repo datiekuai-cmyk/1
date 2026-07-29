@@ -1,9 +1,9 @@
-// 認證模組
+﻿// 隤?璅∠?
 const Auth = {
   currentUser: null,
   isLoggedIn: false,
 
-  // 等待 Google SDK 加載
+  // 蝑? Google SDK ??
   async waitForGoogleSDK() {
     return new Promise((resolve) => {
       if (typeof google !== 'undefined' && google.accounts) {
@@ -18,7 +18,7 @@ const Auth = {
         }
       }, 100);
       
-      // 最多等 5 秒
+      // ?憭? 5 蝘?
       setTimeout(() => {
         clearInterval(checkGoogle);
         resolve();
@@ -26,12 +26,12 @@ const Auth = {
     });
   },
 
-  // 初始化 Google Sign-In
+  // ????Google Sign-In
   async initGoogleSignIn() {
     await Auth.waitForGoogleSDK();
     
     if (typeof google === 'undefined' || !google.accounts) {
-      error('Google SDK 未加載，使用開發登入模式');
+      error('Google SDK ?芸?頛?雿輻??餃璅∪?');
       return;
     }
     
@@ -46,16 +46,23 @@ const Auth = {
         { theme: 'dark', size: 'large' }
       );
     } catch (err) {
-      error('Google Sign-In 初始化失敗，使用開發登入模式:', err);
+      error('Google Sign-In ???仃??雿輻??餃璅∪?:', err);
     }
   },
 
-  // 處理 Google 登入回應
+  // ?? Google ?餃??
   async handleGoogleResponse(response) {
+    const idToken = response && response.credential;
+    if (!idToken) {
+      error('Google ??⊥???credential');
+      return;
+    }
+
     try {
-      const data = await API.auth.googleCallback(response.credential);
-      
-      // 儲存令牌和用戶信息
+      // ????敺垢撽? ID token嚗??Ｙ憓?佗?
+      const data = await API.auth.googleCallback(idToken);
+
+      // ?脣?隞斤???嗡縑?荔?隞亙?蝡臬??喟皞?
       localStorage.setItem(CONFIG.STORAGE_TOKEN, data.token);
       localStorage.setItem(CONFIG.STORAGE_USER, JSON.stringify({
         userId: data.userId,
@@ -63,18 +70,48 @@ const Auth = {
         email: data.email,
         picture: data.picture
       }));
-      
+
       Auth.currentUser = data;
       Auth.isLoggedIn = true;
-      
-      log('登入成功:', data);
+
+      log('?餃?? (server verified):', data);
       UI.switchView('home');
     } catch (err) {
-      error('Google 登入失敗:', err);
+      // ?亙?蝡臭??舐??隤歹??岫 client-side fallback嚗?靘?demo / 皜祈岫嚗?
+      try {
+        const parseJwt = (token) => {
+          const base64Url = (token.split('.')[1] || '');
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          return JSON.parse(jsonPayload);
+        };
+
+        const payload = parseJwt(idToken);
+        const user = {
+          userId: payload.sub,
+          name: payload.name || payload.email,
+          email: payload.email,
+          picture: payload.picture
+        };
+
+        // ?脣? token ??user嚗釣??甇斗瘜??啣?銝??剁???撅內嚗?
+        localStorage.setItem(CONFIG.STORAGE_TOKEN, idToken);
+        localStorage.setItem(CONFIG.STORAGE_USER, JSON.stringify(user));
+        Auth.currentUser = user;
+        Auth.isLoggedIn = true;
+
+        log('?餃?? (client fallback):', user);
+        UI.switchView('home');
+      } catch (e2) {
+        error('Google ?餃憭望?嚗erver ??client fallback ?仃??:', e2, err);
+        UI.switchView('login');
+      }
     }
   },
 
-  // 檢查登入狀態
+  // 瑼Ｘ?餃???
   async checkLoginStatus() {
     const token = localStorage.getItem(CONFIG.STORAGE_TOKEN);
     const userStr = localStorage.getItem(CONFIG.STORAGE_USER);
@@ -104,7 +141,7 @@ const Auth = {
     }
   },
 
-  // 登出
+  // ?餃
   async logout() {
     try {
       await API.auth.logout();
@@ -114,7 +151,8 @@ const Auth = {
       Auth.isLoggedIn = false;
       UI.switchView('login');
     } catch (err) {
-      error('登出失敗:', err);
+      error('?餃憭望?:', err);
     }
   }
 };
+

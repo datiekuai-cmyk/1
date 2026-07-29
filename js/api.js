@@ -1,6 +1,6 @@
-// API 通訊模組
+﻿// API ??璅∠?
 const API = {
-  // 通用 fetch 方法
+  // ? fetch ?寞?
   async request(endpoint, options = {}) {
     const url = `${CONFIG.API_URL}${endpoint}`;
     const token = localStorage.getItem(CONFIG.STORAGE_TOKEN);
@@ -26,12 +26,12 @@ const API = {
       
       return await response.json();
     } catch (err) {
-      error(`API 請求失敗: ${endpoint}`, err);
+      error(`API 隢?憭望?: ${endpoint}`, err);
       throw err;
     }
   },
 
-  // 認證
+  // 隤?
   auth: {
     verify() {
       return API.request('/auth/verify');
@@ -51,7 +51,7 @@ const API = {
     }
   },
 
-  // 角色相關
+  // 閫?賊?
   characters: {
     _cache: null,
     async getAll(force = false) {
@@ -83,7 +83,7 @@ const API = {
     }
   },
 
-  // 題目相關
+  // 憿?賊?
   questions: {
     getRandom(characterId, difficulty = 'easy') {
       return API.request(`/questions/random/${characterId}?difficulty=${difficulty}`);
@@ -101,7 +101,7 @@ const API = {
     }
   },
 
-  // 投票相關
+  // ?巨?賊?
   votes: {
     record(characterId, questionId, isCorrect) {
       return API.request('/votes', {
@@ -118,7 +118,7 @@ const API = {
     }
   },
 
-  // 排行榜
+  // ??璁?
   leaderboard: {
     _cache: {},
     async getAll(force = false) {
@@ -134,7 +134,7 @@ const API = {
         return API.leaderboard._cache.survivor;
       }
       if (!force && API.leaderboard._cache.all) {
-        const data = API.leaderboard._cache.all.filter(item => item.camp === '求生者');
+        const data = API.leaderboard._cache.all.filter(item => item.camp === '瘙???);
         API.leaderboard._cache.survivor = data;
         return data;
       }
@@ -147,7 +147,7 @@ const API = {
         return API.leaderboard._cache.hunter;
       }
       if (!force && API.leaderboard._cache.all) {
-        const data = API.leaderboard._cache.all.filter(item => item.camp === '監管者');
+        const data = API.leaderboard._cache.all.filter(item => item.camp === '??恣??);
         API.leaderboard._cache.hunter = data;
         return data;
       }
@@ -160,15 +160,16 @@ const API = {
     }
   },
 
-  // 冷卻時間
+  // ?瑕??
   cooldown: {
     getStatus(characterId) {
       return API.request(`/cooldown/status/${characterId}`);
     }
   },
 
-  // 資訊
+  // 鞈?
   getInfo() {
     return API.request('/info');
   }
 };
+
