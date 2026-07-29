@@ -3,69 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>蝚砌?鈭箸閫?巨</title>
+  <title>Identity V 投票系統</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
 <body>
   <div id="app">
-    <!-- ?餃?恍 -->
+    <!-- 登入畫面 -->
     <div id="login-view" class="view hidden">
       <div class="login-container">
         <div class="login-header">
-          <h1>蝚砌?鈭箸閫?巨</h1>
-          <p>?豢?雿??????莎?</p>
+          <h1>Identity V 投票系統</h1>
+          <p>請使用 Google 帳號登入後開始投票。</p>
         </div>
         <div id="google-signin-button" class="google-signin"></div>
-        <p class="login-hint">雿輻 Google 撣唾??餃隞仿?憪?蟡?/p>
+        <p class="login-hint">按下上方按鈕登入，查看角色排名與投票結果。</p>
       </div>
     </div>
 
-    <!-- 擐? -->
+    <!-- 首頁 -->
     <div id="home-view" class="view hidden">
       <header class="header">
-        <h1>蝚砌?鈭箸閫?巨</h1>
+        <h1>Identity V 投票系統</h1>
         <div class="user-info">
           <span id="user-name"></span>
-          <button id="logout-btn" class="btn-logout">?餃</button>
+          <button id="logout-btn" class="btn-logout">登出</button>
         </div>
       </header>
 
       <main class="main-content">
         <div class="categories">
           <button class="category-btn" data-camp="survivor">
-            <span class="category-icon">??</span>
-            <span class="category-name">瘙???/span>
+            <span class="category-icon">🛡️</span>
+            <span class="category-name">倖存者</span>
           </button>
           <button class="category-btn" data-camp="hunter">
-            <span class="category-icon">??儭?/span>
-            <span class="category-name">??恣??/span>
+            <span class="category-icon">⚔️</span>
+            <span class="category-name">獵人</span>
           </button>
         </div>
 
         <section class="leaderboard-preview">
-          <h2>??璁?閬?/h2>
+          <h2>排行榜預覽</h2>
           <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="all-rank">?刻???/button>
-            <button class="tab-btn" data-tab="survivor-rank">瘙???/button>
-            <button class="tab-btn" data-tab="hunter-rank">??恣??/button>
+            <button class="tab-btn active" data-tab="all-rank">全部排名</button>
+            <button class="tab-btn" data-tab="survivor-rank">倖存者</button>
+            <button class="tab-btn" data-tab="hunter-rank">獵人</button>
           </div>
           <div id="leaderboard-container" class="leaderboard-list"></div>
-          <a href="#leaderboard" class="view-all-btn">?亦?摰??璁?/a>
+          <a href="#leaderboard" class="view-all-btn">查看完整排行榜</a>
         </section>
       </main>
 
       <footer class="footer">
-        <p>鞈?靘?嚗??脣?洵鈭?獢尹???孵凝???孵凝靽∪?蝔?</p>
-        <p>鞈??敺?????<span id="data-update-date">2026撟???2??/span></p>
+        <p>資料來源自 Identity V 角色投票，排名會即時更新。</p>
+        <p>資料更新日期：<span id="data-update-date">2026 年 7 月 2 日</span></p>
       </footer>
     </div>
 
-    <!-- 閫?”?恍 -->
+    <!-- 角色列表 -->
     <div id="character-list-view" class="view hidden">
       <header class="header">
-        <button class="back-btn" data-back="home">??餈?</button>
-        <h1 id="character-list-title">閫?”</h1>
+        <button class="back-btn" data-back="home">返回</button>
+        <h1 id="character-list-title">角色列表</h1>
         <div></div>
       </header>
 
@@ -74,50 +74,50 @@
       </main>
     </div>
 
-    <!-- 閫閰單??恍 -->
+    <!-- 角色詳細 -->
     <div id="character-detail-view" class="view hidden">
       <header class="header">
-        <button class="back-btn" data-back="character-list">??餈?</button>
-        <h1 id="character-detail-title">閫閰單?</h1>
+        <button class="back-btn" data-back="character-list">返回</button>
+        <h1 id="character-detail-title">角色詳細</h1>
         <div></div>
       </header>
 
       <main class="main-content">
         <div class="character-detail">
           <div class="character-image">
-            <img id="character-img" src="" alt="閫??">
+            <img id="character-img" src="" alt="角色照片">
           </div>
           <div class="character-info">
             <h2 id="detail-manor-name"></h2>
             <div class="info-grid">
               <div class="info-item">
-                <label>?瑟平</label>
+                <label>名稱</label>
                 <span id="detail-profession"></span>
               </div>
               <div class="info-item">
-                <label>???</label>
+                <label>陣營</label>
                 <span id="detail-camp"></span>
               </div>
               <div class="info-item">
-                <label>?桀?蟡冽</label>
+                <label>得票數</label>
                 <span id="detail-votes">0</span>
               </div>
               <div class="info-item">
-                <label>??</label>
-                <span id="detail-rank">閮?銝?..</span>
+                <label>排名</label>
+                <span id="detail-rank">暫無排名</span>
               </div>
             </div>
-            <button id="vote-btn" class="btn-primary btn-large">???巨</button>
+            <button id="vote-btn" class="btn-primary btn-large">投票給他</button>
           </div>
         </div>
       </main>
     </div>
 
-    <!-- ?巨?恍 -->
+    <!-- 投票畫面 -->
     <div id="voting-view" class="view hidden">
       <header class="header">
-        <button class="back-btn" data-back="character-detail">??餈?</button>
-        <h1>蝑??巨</h1>
+        <button class="back-btn" data-back="character-detail">返回</button>
+        <h1>開始投票</h1>
         <div></div>
       </header>
 
@@ -125,7 +125,7 @@
         <div class="voting-container">
           <div class="timer-container">
             <div class="timer" id="timer">60</div>
-            <p class="timer-label">?拚???嚗?嚗?/p>
+            <p class="timer-label">剩餘時間</p>
           </div>
 
           <div class="question-container">
@@ -137,46 +137,46 @@
             <h2 id="result-title"></h2>
             <p id="result-message"></p>
             <div id="result-detail"></div>
-            <button id="next-btn" class="btn-primary btn-large">蝜潛?</button>
+            <button id="next-btn" class="btn-primary btn-large">下一題</button>
           </div>
         </div>
       </main>
     </div>
 
-    <!-- ?瑕???恍 -->
+    <!-- 冷卻畫面 -->
     <div id="cooldown-view" class="view hidden">
       <header class="header">
-        <button class="back-btn" data-back="character-detail">??餈?</button>
-        <h1>蝑?銝?/h1>
+        <button class="back-btn" data-back="character-detail">返回</button>
+        <h1>冷卻時間</h1>
         <div></div>
       </header>
 
       <main class="main-content">
         <div class="cooldown-container">
-          <div class="cooldown-icon">?梧?</div>
+          <div class="cooldown-icon">⏳</div>
           <h2 id="cooldown-title"></h2>
           <p id="cooldown-message"></p>
           <div class="cooldown-timer">
             <div id="cooldown-remaining"></div>
           </div>
-          <button class="btn-primary btn-large" id="cooldown-done-btn">摰?蝑?</button>
+          <button class="btn-primary btn-large" id="cooldown-done-btn">返回主畫面</button>
         </div>
       </main>
     </div>
 
-    <!-- ??璁??-->
+    <!-- 排行榜頁面 -->
     <div id="leaderboard-view" class="view hidden">
       <header class="header">
-        <button class="back-btn" data-back="home">??餈?</button>
-        <h1>??璁?/h1>
+        <button class="back-btn" data-back="home">返回</button>
+        <h1>排行榜</h1>
         <div></div>
       </header>
 
       <main class="main-content">
         <div class="leaderboard-tabs">
-          <button class="leaderboard-tab-btn active" data-rank-type="all">?刻??脫?銵?/button>
-          <button class="leaderboard-tab-btn" data-rank-type="survivor">瘙???銵?/button>
-          <button class="leaderboard-tab-btn" data-rank-type="hunter">??恣??銵?/button>
+          <button class="leaderboard-tab-btn active" data-rank-type="all">所有選手</button>
+          <button class="leaderboard-tab-btn" data-rank-type="survivor">倖存者</button>
+          <button class="leaderboard-tab-btn" data-rank-type="hunter">獵人</button>
         </div>
         <div id="full-leaderboard" class="full-leaderboard"></div>
       </main>
@@ -191,4 +191,3 @@
   <script src="js/main.js"></script>
 </body>
 </html>
-
