@@ -208,15 +208,56 @@ const UI = {
       document.getElementById('detail-votes').textContent = character.vote_count || 0;
 
       const img = document.getElementById('character-img');
-      img.src = this.getCharacterImagePath(character);
-      img.onerror = () => {
-        if (img.src.endsWith('.png')) {
-          img.onerror = null;
-          img.src = img.src.replace(/\.png$/, '.jpg');
-        } else {
-          img.style.display = 'none';
+      // set placeholder while probing for actual image
+      img.style.display = '';
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360"><rect width="100%" height="100%" fill="#444"/></svg>';
+
+      // async probe helper
+      const probeImageUrl = async (url) => {
+        try {
+          const resp = await fetch(url, { method: 'GET' });
+          if (resp.ok && resp.headers.get('content-type') && resp.headers.get('content-type').startsWith('image')) {
+            return url;
+          }
+        } catch (e) {
+          // ignore
         }
+        return null;
       };
+
+      // build candidates (prefer map, then names)
+      const candidates = [];
+      const map = window.CHARACTER_IMAGE_MAP || {};
+      if (character.character_id && map[character.character_id]) {
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(map[character.character_id])}`);
+      }
+
+      // add sanitized name candidates
+      const sanitize = (v) => v ? String(v).replace(/["'`\\]/g, '').trim() : '';
+      const names = [character.profession, character.manor_name, character.alias, character.real_name, character.character_id].map(sanitize).filter(Boolean);
+      names.forEach(n => {
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n)}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.png')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.jpg')}`);
+      });
+
+      // fallback to id.png
+      if (character.character_id) {
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.png')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.jpg')}`);
+      }
+
+      (async () => {
+        for (const c of candidates) {
+          const ok = await probeImageUrl(c);
+          if (ok) {
+            img.src = ok;
+            return;
+          }
+        }
+        // if none found, hide img
+        img.style.display = 'none';
+      })();
 
       this.checkAndUpdateCooldown();
       this.switchView('character-detail');
