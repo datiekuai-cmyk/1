@@ -225,24 +225,39 @@ const UI = {
         return null;
       };
 
-      // build candidates (prefer map, then names)
-      const candidates = [];
-      const map = window.CHARACTER_IMAGE_MAP || {};
-      if (character.character_id && map[character.character_id]) {
-        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(map[character.character_id])}`);
+      // build candidates with local cache and prefer static gh-pages assets
+      const cacheKey = 'characterImageCache_v1';
+      const cache = (() => {
+        try { return JSON.parse(localStorage.getItem(cacheKey) || '{}'); } catch(e){ return {}; }
+      })();
+      if (character.character_id && cache[character.character_id]) {
+        img.src = cache[character.character_id];
+        return;
       }
 
-      // add sanitized name candidates
+      const candidates = [];
+      const map = window.CHARACTER_IMAGE_MAP || {};
+      const baseStatic = '角色照片/';
+      if (character.character_id && map[character.character_id]) {
+        const filename = map[character.character_id];
+        candidates.push(`${baseStatic}${encodeURIComponent(filename)}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(filename)}`);
+      }
+
       const sanitize = (v) => v ? String(v).replace(/["'`\\]/g, '').trim() : '';
       const names = [character.profession, character.manor_name, character.alias, character.real_name, character.character_id].map(sanitize).filter(Boolean);
       names.forEach(n => {
+        candidates.push(`${baseStatic}${encodeURIComponent(n)}`);
+        candidates.push(`${baseStatic}${encodeURIComponent(n + '.png')}`);
+        candidates.push(`${baseStatic}${encodeURIComponent(n + '.jpg')}`);
         candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n)}`);
         candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.png')}`);
         candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.jpg')}`);
       });
 
-      // fallback to id.png
       if (character.character_id) {
+        candidates.push(`${baseStatic}${encodeURIComponent(character.character_id + '.png')}`);
+        candidates.push(`${baseStatic}${encodeURIComponent(character.character_id + '.jpg')}`);
         candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.png')}`);
         candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.jpg')}`);
       }
@@ -252,10 +267,13 @@ const UI = {
           const ok = await probeImageUrl(c);
           if (ok) {
             img.src = ok;
+            try {
+              cache[character.character_id] = ok;
+              localStorage.setItem(cacheKey, JSON.stringify(cache));
+            } catch (e) {}
             return;
           }
         }
-        // if none found, hide img
         img.style.display = 'none';
       })();
 
