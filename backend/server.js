@@ -69,17 +69,6 @@ app.get('/api/photo', (req, res, next) => {
 
 app.use('/角色照片', express.static(PHOTO_PATH));
 
-// 臨時 debug 端點：檢查照片路徑與檔案是否存在
-app.get('/api/debug/photo-check', (req, res) => {
-  const name = req.query.name || '';
-  const decoded = (() => {
-    try { return decodeURIComponent(name); } catch (e) { return name; }
-  })();
-  const filePath = path.join(PHOTO_PATH, decoded || '');
-  const exists = fs.existsSync(filePath);
-  res.json({ PHOTO_PATH, requested: name, decoded, filePath, exists });
-});
-
 if (fs.existsSync(FRONTEND_PATH)) {
   app.use(express.static(FRONTEND_PATH));
 }
