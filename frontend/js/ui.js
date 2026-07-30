@@ -26,7 +26,7 @@ const UI = {
   },
 
   updateUserInfo(name) {
-    document.getElementById('user-name').textContent = name || '雿輻??;
+    document.getElementById('user-name').textContent = name || '';
   },
 
   getCharacterImagePath(character) {
@@ -118,12 +118,12 @@ const UI = {
           <div class="leaderboard-rank">#${index + 1}</div>
           <div class="leaderboard-name">${item.profession}</div>
           <div class="leaderboard-subname">${item.manor_name}</div>
-          <div class="leaderboard-votes">${item.vote_count} 蟡?/div>
+          <div class="leaderboard-votes">${item.vote_count} 票</div>
         `;
         container.appendChild(element);
       });
     } catch (err) {
-      error('????璁仃??', err);
+      error('載入排行榜預覽失敗', err);
     }
   },
 
@@ -167,7 +167,7 @@ const UI = {
       const data = await API.characters.getAll();
       const characters = camp === 'survivor' ? data.survivors : data.hunters;
 
-      const title = camp === 'survivor' ? '瘙??? : '??恣??;
+      const title = camp === 'survivor' ? '倖存者' : '獵人';
       document.getElementById('character-list-title').textContent = title;
 
       const grid = document.getElementById('characters-grid');
@@ -192,7 +192,7 @@ const UI = {
 
       this.switchView('character-list');
     } catch (err) {
-      error('??閫?”憭望?:', err);
+      error('載入角色列表失敗', err);
     }
   },
 
@@ -208,15 +208,56 @@ const UI = {
       document.getElementById('detail-votes').textContent = character.vote_count || 0;
 
       const img = document.getElementById('character-img');
-      img.src = this.getCharacterImagePath(character);
-      img.onerror = () => {
-        if (img.src.endsWith('.png')) {
-          img.onerror = null;
-          img.src = img.src.replace(/\.png$/, '.jpg');
-        } else {
-          img.style.display = 'none';
+      // set placeholder while probing for actual image
+      img.style.display = '';
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360"><rect width="100%" height="100%" fill="#444"/></svg>';
+
+      // async probe helper
+      const probeImageUrl = async (url) => {
+        try {
+          const resp = await fetch(url, { method: 'GET' });
+          if (resp.ok && resp.headers.get('content-type') && resp.headers.get('content-type').startsWith('image')) {
+            return url;
+          }
+        } catch (e) {
+          // ignore
         }
+        return null;
       };
+
+      // build candidates (prefer map, then names)
+      const candidates = [];
+      const map = window.CHARACTER_IMAGE_MAP || {};
+      if (character.character_id && map[character.character_id]) {
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(map[character.character_id])}`);
+      }
+
+      // add sanitized name candidates
+      const sanitize = (v) => v ? String(v).replace(/["'`\\]/g, '').trim() : '';
+      const names = [character.profession, character.manor_name, character.alias, character.real_name, character.character_id].map(sanitize).filter(Boolean);
+      names.forEach(n => {
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n)}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.png')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.jpg')}`);
+      });
+
+      // fallback to id.png
+      if (character.character_id) {
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.png')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.jpg')}`);
+      }
+
+      (async () => {
+        for (const c of candidates) {
+          const ok = await probeImageUrl(c);
+          if (ok) {
+            img.src = ok;
+            return;
+          }
+        }
+        // if none found, hide img
+        img.style.display = 'none';
+      })();
 
       this.checkAndUpdateCooldown();
       this.switchView('character-detail');
@@ -232,25 +273,25 @@ const UI = {
 
       if (cooldown.inCooldown) {
         btn.disabled = true;
-        btn.textContent = `?瑕銝?.. ${cooldown.remainingSeconds}蝘;
+        btn.textContent = `冷卻中 ${cooldown.remainingSeconds}s`;
 
         let remaining = cooldown.remainingSeconds;
         const interval = setInterval(() => {
           remaining--;
-          btn.textContent = `?瑕銝?.. ${remaining}蝘;
+          btn.textContent = `冷卻中 ${remaining}s`;
 
           if (remaining <= 0) {
             clearInterval(interval);
             btn.disabled = false;
-            btn.textContent = '???巨';
+            btn.textContent = '投票給他';
           }
         }, 1000);
       } else {
         btn.disabled = false;
-        btn.textContent = '???巨';
+        btn.textContent = '投票給他';
       }
     } catch (err) {
-      error('瑼Ｘ?瑕??憭望?:', err);
+      error('檢查冷卻狀態失敗', err);
     }
   },
 
@@ -313,7 +354,7 @@ const UI = {
   },
 
   handleTimeUp() {
-    this.showResult(false, '??撌脣嚗?, '蝑??航炊嚗?蝔??岫');
+    this.showResult(false, '時間到', '時間到，答題結束', '');
   },
 
   async submitAnswer(selectedAnswer) {
@@ -344,12 +385,12 @@ const UI = {
 
       this.showResult(
         result.isCorrect,
-        result.isCorrect ? '蝑?鈭?' : '蝑鈭?,
+        result.isCorrect ? '回答正確' : '回答錯誤',
         result.message,
         result.correctAnswer
       );
     } catch (err) {
-      error('?漱蝑?憭望?:', err);
+      error('提交答案時發生錯誤', err);
     }
   },
 
@@ -362,7 +403,7 @@ const UI = {
     resultTitle.textContent = title;
     resultTitle.style.color = isCorrect ? 'var(--success-color)' : 'var(--error-color)';
     resultMsg.textContent = message;
-    resultDetail.textContent = isCorrect ? '' : `甇?Ⅱ蝑?: ${correctAnswer}`;
+    resultDetail.textContent = isCorrect ? '' : `正確答案: ${correctAnswer}`;
 
     resultContainer.classList.remove('hidden');
   },
