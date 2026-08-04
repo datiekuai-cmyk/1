@@ -177,7 +177,10 @@ const API = {
         return API.leaderboard._cache.survivor;
       }
       const rankings = await API.leaderboard.getAll(force);
-      const data = rankings.filter(item => item.camp === 'survivor');
+      const data = rankings.filter(item => {
+        const camp = String(item.camp || '').toLowerCase();
+        return camp === 'survivor' || camp === '求生者';
+      });
       API.leaderboard._cache.survivor = data;
       return data;
     },
@@ -186,7 +189,10 @@ const API = {
         return API.leaderboard._cache.hunter;
       }
       const rankings = await API.leaderboard.getAll(force);
-      const data = rankings.filter(item => item.camp === 'hunter');
+      const data = rankings.filter(item => {
+        const camp = String(item.camp || '').toLowerCase();
+        return camp === 'hunter' || camp === '監管者';
+      });
       API.leaderboard._cache.hunter = data;
       return data;
     },
