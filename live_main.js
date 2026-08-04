@@ -1,23 +1,23 @@
-﻿// 銝餅??函?撘?
+// 主應用程式
 const App = {
   async init() {
-    log('初始化應用...');
+    log('初始化應用程式...');
     
-    // ????Google Sign-In
+    // 初始化 Google Sign-In
     await Auth.initGoogleSignIn();
     
-    // 蝬?鈭辣????
+    // 綁定事件監聽器
     App.bindEventListeners();
     
-    // 瑼Ｘ?餃???
+    // 檢查登入狀態
     await Auth.checkLoginStatus();
 
-    // ???閫??銵?鞈?嚗?撠脣?巨隞?辣??
+    // 背景預載角色與排行榜資料，減少進入投票介面的延遲
     App.prefetchData();
   },
 
   bindEventListeners() {
-    // ????
+    // 分類按鈕
     document.querySelectorAll('.category-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const camp = e.currentTarget.dataset.camp;
@@ -27,7 +27,7 @@ const App = {
       });
     });
 
-    // 餈???
+    // 返回按鈕
     document.querySelectorAll('.back-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const backTo = e.currentTarget.dataset.back;
@@ -35,24 +35,24 @@ const App = {
       });
     });
 
-    // ?餃??
+    // 登出按鈕
     document.getElementById('logout-btn').addEventListener('click', () => {
       Auth.logout();
     });
 
-    // ???巨??
+    // 開始投票按鈕
     document.getElementById('vote-btn').addEventListener('click', async () => {
       if (!document.getElementById('vote-btn').disabled) {
         await UI.startVoting();
       }
     });
 
-    // ?巨敺匱蝥???
+    // 投票後繼續按鈕
     document.getElementById('next-btn').addEventListener('click', () => {
       UI.continueAfterVoting();
     });
 
-    // ??璁?蝐?
+    // 排行榜標籤
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -67,7 +67,7 @@ const App = {
       });
     });
 
-    // 摰??璁?蝐?
+    // 完整排行榜標籤
     document.querySelectorAll('.leaderboard-tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.leaderboard-tab-btn').forEach(b => 
@@ -79,26 +79,25 @@ const App = {
       });
     });
 
-    // ?亦?摰??璁??
+    // 查看完整排行榜連結
     document.querySelector('.view-all-btn').addEventListener('click', (e) => {
       e.preventDefault();
       UI.switchView('leaderboard');
     });
 
-    // ?瑕??摰???
+    // 冷卻時間完成按鈕
     document.getElementById('cooldown-done-btn').addEventListener('click', () => {
       UI.switchView('character-detail');
     });
   },
 
   async prefetchData() {
-    API.characters.getAll().catch(err => log('預取角色資料失敗', err));
-    API.leaderboard.getAll().catch(err => log('預取排行榜失敗', err));
+    API.characters.getAll().catch(err => log('預載角色資訊失敗', err));
+    API.leaderboard.getAll().catch(err => log('預載排行榜失敗', err));
   }
 };
 
-// ??DOM ??摰??????函?撘?
+// 當 DOM 加載完成時啟動應用程式
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });
-

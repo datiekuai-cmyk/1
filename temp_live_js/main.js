@@ -1,7 +1,7 @@
 ﻿// 銝餅??函?撘?
 const App = {
   async init() {
-    log('初始化應用...');
+    log('?????函?撘?..');
     
     // ????Google Sign-In
     await Auth.initGoogleSignIn();
@@ -92,8 +92,8 @@ const App = {
   },
 
   async prefetchData() {
-    API.characters.getAll().catch(err => log('預取角色資料失敗', err));
-    API.leaderboard.getAll().catch(err => log('預取排行榜失敗', err));
+    API.characters.getAll().catch(err => log('??閫鞈?憭望?', err));
+    API.leaderboard.getAll().catch(err => log('????璁仃??, err));
   }
 };
 

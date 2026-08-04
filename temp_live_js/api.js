@@ -121,63 +121,24 @@ const API = {
   // ??璁?
   leaderboard: {
     _cache: {},
-    async getFallbackFromCharacters() {
-      try {
-        const data = await API.characters.getAll();
-        const buildList = (campName, campValue) => {
-          const source = (data[campName] || []).map((char, index) => ({
-            character_id: char.character_id,
-            manor_name: char.manor_name,
-            profession: char.profession,
-            camp: campValue,
-            vote_count: char.vote_count || 0,
-            fallback: true,
-            rank: index + 1
-          }));
-
-          return source.sort((a, b) => {
-            const voteDiff = (b.vote_count || 0) - (a.vote_count || 0);
-            if (voteDiff !== 0) return voteDiff;
-            return (a.profession || '').localeCompare(b.profession || '', 'zh-Hant');
-          });
-        };
-
-        const survivor = buildList('survivors', 'survivor');
-        const hunter = buildList('hunters', 'hunter');
-        const all = [...survivor, ...hunter].sort((a, b) => {
-          const voteDiff = (b.vote_count || 0) - (a.vote_count || 0);
-          if (voteDiff !== 0) return voteDiff;
-          return (a.profession || '').localeCompare(b.profession || '', 'zh-Hant');
-        });
-
-        return { all, survivor, hunter };
-      } catch (err) {
-        return { all: [], survivor: [], hunter: [] };
-      }
-    },
     async getAll(force = false) {
       if (!force && API.leaderboard._cache.all) {
         return API.leaderboard._cache.all;
       }
-
-      try {
-        const data = await API.request('/leaderboard/all');
-        API.leaderboard._cache.all = data;
-        return data;
-      } catch (err) {
-        const fallback = await API.leaderboard.getFallbackFromCharacters();
-        API.leaderboard._cache.all = fallback.all;
-        API.leaderboard._cache.survivor = fallback.survivor;
-        API.leaderboard._cache.hunter = fallback.hunter;
-        return fallback.all;
-      }
+      const data = await API.request('/leaderboard/all');
+      API.leaderboard._cache.all = data;
+      return data;
     },
     async getSurvivors(force = false) {
       if (!force && API.leaderboard._cache.survivor) {
         return API.leaderboard._cache.survivor;
       }
-      const rankings = await API.leaderboard.getAll(force);
-      const data = rankings.filter(item => item.camp === 'survivor');
+      if (!force && API.leaderboard._cache.all) {
+        const data = API.leaderboard._cache.all.filter(item => item.camp === '瘙???);
+        API.leaderboard._cache.survivor = data;
+        return data;
+      }
+      const data = await API.request('/leaderboard/survivor');
       API.leaderboard._cache.survivor = data;
       return data;
     },
@@ -185,8 +146,12 @@ const API = {
       if (!force && API.leaderboard._cache.hunter) {
         return API.leaderboard._cache.hunter;
       }
-      const rankings = await API.leaderboard.getAll(force);
-      const data = rankings.filter(item => item.camp === 'hunter');
+      if (!force && API.leaderboard._cache.all) {
+        const data = API.leaderboard._cache.all.filter(item => item.camp === '??恣??);
+        API.leaderboard._cache.hunter = data;
+        return data;
+      }
+      const data = await API.request('/leaderboard/hunter');
       API.leaderboard._cache.hunter = data;
       return data;
     },
