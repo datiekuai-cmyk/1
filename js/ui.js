@@ -119,11 +119,12 @@ const UI = {
       rankings.slice(0, 10).forEach((item, index) => {
         const element = document.createElement('div');
         element.className = 'leaderboard-item';
+        const votes = item.vote_count ?? item.votes ?? 0;
         element.innerHTML = `
           <div class="leaderboard-rank">#${index + 1}</div>
           <div class="leaderboard-name">${item.profession}</div>
           <div class="leaderboard-subname">${item.manor_name}</div>
-          <div class="leaderboard-votes">${item.vote_count} 票</div>
+          <div class="leaderboard-votes">${votes} 票</div>
         `;
         container.appendChild(element);
       });
@@ -157,13 +158,14 @@ const UI = {
       rankings.forEach((item, index) => {
         const element = document.createElement('div');
         element.className = 'ranking-item';
+        const votes = item.vote_count ?? item.votes ?? 0;
         element.innerHTML = `
           <div class="rank-badge">#${index + 1}</div>
           <div>
             <div class="rank-name">${item.profession}</div>
             <div class="rank-subname">${item.manor_name}</div>
           </div>
-          <div class="rank-votes">${item.vote_count}</div>
+          <div class="rank-votes">${votes}</div>
         `;
         container.appendChild(element);
       });
@@ -215,7 +217,8 @@ const UI = {
       document.getElementById('detail-manor-name').textContent = character.manor_name;
       document.getElementById('detail-profession').textContent = character.profession;
       document.getElementById('detail-camp').textContent = character.camp;
-      document.getElementById('detail-votes').textContent = character.vote_count || 0;
+      document.getElementById('detail-votes').textContent = character.vote_count ?? character.votes ?? 0;
+      document.getElementById('detail-rank').textContent = character.rank ? `#${character.rank}` : '暫無排名';
 
       const img = document.getElementById('character-img');
       // set placeholder while probing for actual image
@@ -242,7 +245,6 @@ const UI = {
       })();
       if (character.character_id && cache[character.character_id]) {
         img.src = cache[character.character_id];
-        return;
       }
 
       const candidates = [];

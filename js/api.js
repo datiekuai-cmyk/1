@@ -130,7 +130,7 @@ const API = {
             manor_name: char.manor_name,
             profession: char.profession,
             camp: campValue,
-            vote_count: char.vote_count || 0,
+            vote_count: char.vote_count ?? char.votes ?? 0,
             fallback: true,
             rank: index + 1
           }));
