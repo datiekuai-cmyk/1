@@ -111,6 +111,11 @@ const UI = {
       const container = document.getElementById('leaderboard-container');
       container.innerHTML = '';
 
+      if (!rankings || rankings.length === 0) {
+        container.innerHTML = '<div class="empty-message">目前沒有排名或載入失敗。請檢查後端或瀏覽器主控台（Console）錯誤。</div>';
+        return;
+      }
+
       rankings.slice(0, 10).forEach((item, index) => {
         const element = document.createElement('div');
         element.className = 'leaderboard-item';
@@ -144,6 +149,11 @@ const UI = {
       const container = document.getElementById('full-leaderboard');
       container.innerHTML = '';
 
+      if (!rankings || rankings.length === 0) {
+        container.innerHTML = '<div class="empty-message">目前沒有排名或載入失敗。請檢查後端或瀏覽器主控台（Console）錯誤。</div>';
+        return;
+      }
+
       rankings.forEach((item, index) => {
         const element = document.createElement('div');
         element.className = 'ranking-item';
@@ -167,7 +177,7 @@ const UI = {
       const data = await API.characters.getAll();
       const characters = camp === 'survivor' ? data.survivors : data.hunters;
 
-      const title = camp === 'survivor' ? '倖存者' : '獵人';
+      const title = camp === 'survivor' ? '求生者' : '監管者';
       document.getElementById('character-list-title').textContent = title;
 
       const grid = document.getElementById('characters-grid');
@@ -301,12 +311,12 @@ const UI = {
           if (remaining <= 0) {
             clearInterval(interval);
             btn.disabled = false;
-            btn.textContent = '投票給他';
+            btn.textContent = '投票給此角色';
           }
         }, 1000);
       } else {
         btn.disabled = false;
-        btn.textContent = '投票給他';
+        btn.textContent = '投票給此角色';
       }
     } catch (err) {
       error('檢查冷卻狀態失敗', err);
