@@ -1,4 +1,4 @@
-// UI 管理模組
+﻿// UI 蝞∠?璅∠?
 const UI = {
   currentView: null,
   currentCharacter: null,
@@ -26,7 +26,7 @@ const UI = {
   },
 
   updateUserInfo(name) {
-    document.getElementById('user-name').textContent = name || '使用者';
+    document.getElementById('user-name').textContent = name || '';
   },
 
   getCharacterImagePath(character) {
@@ -41,7 +41,7 @@ const UI = {
     const sanitize = (value) => {
       if (!value) return '';
       return String(value)
-        .replace(/[“”‘’"'`\\/]/g, '')
+        .replace(/[??'`\\/]/g, '')
         .replace(/\s+/g, ' ')
         .trim();
     };
@@ -76,11 +76,12 @@ const UI = {
     const candidates = buildCandidates();
     for (const candidate of candidates) {
       if (candidate.endsWith('.png') || candidate.endsWith('.jpg')) {
-        return `角色照片/${candidate}`;
+        // ??敺垢隞??????嚗??蝡舫????芸??怠???皞?
+        return `${CONFIG.API_URL}/photo?name=${encodeURIComponent(candidate)}`;
       }
     }
 
-    return `角色照片/${characterId || 'default'}.png`;
+    return `${CONFIG.API_URL}/photo?name=${encodeURIComponent((characterId || 'default') + '.png')}`;
   },
 
   async initHomeView() {
@@ -89,7 +90,7 @@ const UI = {
       document.getElementById('data-update-date').textContent = info.lastUpdate;
       this.loadLeaderboardPreview('all');
     } catch (err) {
-      error('初始化首頁失敗:', err);
+      error('?????仃??', err);
     }
   },
 
@@ -110,6 +111,11 @@ const UI = {
       const container = document.getElementById('leaderboard-container');
       container.innerHTML = '';
 
+      if (!rankings || rankings.length === 0) {
+        container.innerHTML = '<div class="empty-message">目前沒有排名或載入失敗。請檢查後端或瀏覽器主控台（Console）錯誤。</div>';
+        return;
+      }
+
       rankings.slice(0, 10).forEach((item, index) => {
         const element = document.createElement('div');
         element.className = 'leaderboard-item';
@@ -122,7 +128,7 @@ const UI = {
         container.appendChild(element);
       });
     } catch (err) {
-      error('加載排行榜失敗:', err);
+      error('載入排行榜預覽失敗', err);
     }
   },
 
@@ -143,6 +149,11 @@ const UI = {
       const container = document.getElementById('full-leaderboard');
       container.innerHTML = '';
 
+      if (!rankings || rankings.length === 0) {
+        container.innerHTML = '<div class="empty-message">目前沒有排名或載入失敗。請檢查後端或瀏覽器主控台（Console）錯誤。</div>';
+        return;
+      }
+
       rankings.forEach((item, index) => {
         const element = document.createElement('div');
         element.className = 'ranking-item';
@@ -157,7 +168,7 @@ const UI = {
         container.appendChild(element);
       });
     } catch (err) {
-      error('加載排行榜失敗:', err);
+      error('????璁仃??', err);
     }
   },
 
@@ -191,7 +202,7 @@ const UI = {
 
       this.switchView('character-list');
     } catch (err) {
-      error('加載角色列表失敗:', err);
+      error('載入角色列表失敗', err);
     }
   },
 
@@ -207,20 +218,79 @@ const UI = {
       document.getElementById('detail-votes').textContent = character.vote_count || 0;
 
       const img = document.getElementById('character-img');
-      img.src = this.getCharacterImagePath(character);
-      img.onerror = () => {
-        if (img.src.endsWith('.png')) {
-          img.onerror = null;
-          img.src = img.src.replace(/\.png$/, '.jpg');
-        } else {
-          img.style.display = 'none';
+      // set placeholder while probing for actual image
+      img.style.display = '';
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360"><rect width="100%" height="100%" fill="#444"/></svg>';
+
+      // async probe helper
+      const probeImageUrl = async (url) => {
+        try {
+          const resp = await fetch(url, { method: 'GET' });
+          if (resp.ok && resp.headers.get('content-type') && resp.headers.get('content-type').startsWith('image')) {
+            return url;
+          }
+        } catch (e) {
+          // ignore
         }
+        return null;
       };
+
+      // build candidates with local cache and prefer static gh-pages assets
+      const cacheKey = 'characterImageCache_v1';
+      const cache = (() => {
+        try { return JSON.parse(localStorage.getItem(cacheKey) || '{}'); } catch(e){ return {}; }
+      })();
+      if (character.character_id && cache[character.character_id]) {
+        img.src = cache[character.character_id];
+        return;
+      }
+
+      const candidates = [];
+      const map = window.CHARACTER_IMAGE_MAP || {};
+      const baseStatic = '角色照片/';
+      if (character.character_id && map[character.character_id]) {
+        const filename = map[character.character_id];
+        candidates.push(`${baseStatic}${encodeURIComponent(filename)}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(filename)}`);
+      }
+
+      const sanitize = (v) => v ? String(v).replace(/["'`\\]/g, '').trim() : '';
+      const names = [character.profession, character.manor_name, character.alias, character.real_name, character.character_id].map(sanitize).filter(Boolean);
+      names.forEach(n => {
+        candidates.push(`${baseStatic}${encodeURIComponent(n)}`);
+        candidates.push(`${baseStatic}${encodeURIComponent(n + '.png')}`);
+        candidates.push(`${baseStatic}${encodeURIComponent(n + '.jpg')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n)}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.png')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(n + '.jpg')}`);
+      });
+
+      if (character.character_id) {
+        candidates.push(`${baseStatic}${encodeURIComponent(character.character_id + '.png')}`);
+        candidates.push(`${baseStatic}${encodeURIComponent(character.character_id + '.jpg')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.png')}`);
+        candidates.push(`${CONFIG.API_URL}/photo?name=${encodeURIComponent(character.character_id + '.jpg')}`);
+      }
+
+      (async () => {
+        for (const c of candidates) {
+          const ok = await probeImageUrl(c);
+          if (ok) {
+            img.src = ok;
+            try {
+              cache[character.character_id] = ok;
+              localStorage.setItem(cacheKey, JSON.stringify(cache));
+            } catch (e) {}
+            return;
+          }
+        }
+        img.style.display = 'none';
+      })();
 
       this.checkAndUpdateCooldown();
       this.switchView('character-detail');
     } catch (err) {
-      error('加載角色詳情失敗:', err);
+      error('??閫閰單?憭望?:', err);
     }
   },
 
@@ -231,25 +301,25 @@ const UI = {
 
       if (cooldown.inCooldown) {
         btn.disabled = true;
-        btn.textContent = `冷卻中... ${cooldown.remainingSeconds}秒`;
+        btn.textContent = `冷卻中 ${cooldown.remainingSeconds}s`;
 
         let remaining = cooldown.remainingSeconds;
         const interval = setInterval(() => {
           remaining--;
-          btn.textContent = `冷卻中... ${remaining}秒`;
+          btn.textContent = `冷卻中 ${remaining}s`;
 
           if (remaining <= 0) {
             clearInterval(interval);
             btn.disabled = false;
-            btn.textContent = '開始投票';
+            btn.textContent = '投票給此角色';
           }
         }, 1000);
       } else {
         btn.disabled = false;
-        btn.textContent = '開始投票';
+        btn.textContent = '投票給此角色';
       }
     } catch (err) {
-      error('檢查冷卻時間失敗:', err);
+      error('檢查冷卻狀態失敗', err);
     }
   },
 
@@ -278,7 +348,7 @@ const UI = {
       this.startTimer();
       this.switchView('voting');
     } catch (err) {
-      error('開始投票失敗:', err);
+      error('???巨憭望?:', err);
     }
   },
 
@@ -312,7 +382,7 @@ const UI = {
   },
 
   handleTimeUp() {
-    this.showResult(false, '時間已到！', '答案錯誤，請稍後再試');
+    this.showResult(false, '時間到', '時間到，答題結束', '');
   },
 
   async submitAnswer(selectedAnswer) {
@@ -343,12 +413,12 @@ const UI = {
 
       this.showResult(
         result.isCorrect,
-        result.isCorrect ? '答對了！' : '答錯了',
+        result.isCorrect ? '回答正確' : '回答錯誤',
         result.message,
         result.correctAnswer
       );
     } catch (err) {
-      error('提交答案失敗:', err);
+      error('提交答案時發生錯誤', err);
     }
   },
 
@@ -377,9 +447,10 @@ const UI = {
         return;
       }
     } catch (err) {
-      error('更新冷卻時間失敗:', err);
+      error('?湔?瑕??憭望?:', err);
     }
 
     this.switchView('character-detail');
   }
 };
+
