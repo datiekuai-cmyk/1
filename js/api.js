@@ -6,12 +6,15 @@ const API = {
     const token = localStorage.getItem(CONFIG.STORAGE_TOKEN);
     
     const headers = {
-      'Content-Type': 'application/json',
       ...options.headers
     };
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    if (options.body != null && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
     }
     
     try {
@@ -85,6 +88,24 @@ const API = {
     }
   },
 
+  async loadLocalCharacters() {
+    if (API._localCharacterData) {
+      return API._localCharacterData;
+    }
+
+    try {
+      const response = await fetch('backend_characters.json');
+      if (!response.ok) {
+        throw new Error(`Local character data failed: ${response.status}`);
+      }
+      API._localCharacterData = await response.json();
+      return API._localCharacterData;
+    } catch (err) {
+      error('載入本地角色資料失敗', err);
+      throw err;
+    }
+  },
+
   // 閫?賊?
   characters: {
     _cache: null,
@@ -92,9 +113,16 @@ const API = {
       if (!force && API.characters._cache) {
         return API.characters._cache;
       }
-      const data = await API.request('/characters');
-      API.characters._cache = data;
-      return data;
+
+      try {
+        const data = await API.request('/characters');
+        API.characters._cache = data;
+        return data;
+      } catch (err) {
+        const data = await API.loadLocalCharacters();
+        API.characters._cache = data;
+        return data;
+      }
     },
     async getDetail(characterId) {
       if (API.characters._cache) {
