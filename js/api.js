@@ -66,7 +66,9 @@ const API = {
         throw e;
       }
     } catch (err) {
-      error(`API 隢?憭望?: ${endpoint}`, err);
+      if (!silent) {
+        error(`API 隢?憭望?: ${endpoint}`, err);
+      }
       throw err;
     }
   },
