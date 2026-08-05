@@ -2,24 +2,25 @@
 const API = {
   // ? fetch ?寞?
   async request(endpoint, options = {}) {
+    const { silent = false, ...fetchOptions } = options;
     const url = `${CONFIG.API_URL}${endpoint}`;
     const token = localStorage.getItem(CONFIG.STORAGE_TOKEN);
     
     const headers = {
-      ...options.headers
+      ...fetchOptions.headers
     };
     
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    if (options.body != null && !headers['Content-Type']) {
+    if (fetchOptions.body != null && !headers['Content-Type']) {
       headers['Content-Type'] = 'application/json';
     }
     
     try {
       const response = await fetch(url, {
-        ...options,
+        ...fetchOptions,
         headers
       });
       
@@ -29,7 +30,9 @@ const API = {
       
       return await response.json();
     } catch (err) {
-      error(`API 隢?憭望?: ${endpoint}`, err);
+      if (!silent) {
+        error(`API 隢?憭望?: ${endpoint}`, err);
+      }
       throw err;
     }
   },
@@ -81,7 +84,7 @@ const API = {
       }
 
       try {
-        const data = await API.request('/characters');
+        const data = await API.request('/characters', { silent: true });
         API.characters._cache = data;
         return data;
       } catch (err) {

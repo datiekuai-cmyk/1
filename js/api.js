@@ -2,24 +2,25 @@
 const API = {
   // ? fetch ?寞?
   async request(endpoint, options = {}) {
+    const { silent = false, ...fetchOptions } = options;
     const url = `${CONFIG.API_URL}${endpoint}`;
     const token = localStorage.getItem(CONFIG.STORAGE_TOKEN);
     
     const headers = {
-      ...options.headers
+      ...fetchOptions.headers
     };
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    if (options.body != null && !headers['Content-Type']) {
+    if (fetchOptions.body != null && !headers['Content-Type']) {
       headers['Content-Type'] = 'application/json';
     }
     
     try {
       const response = await fetch(url, {
-        ...options,
+        ...fetchOptions,
         headers
       });
 
@@ -30,7 +31,9 @@ const API = {
         const err = new Error(`HTTP ${response.status}: ${bodyText ? bodyText.slice(0, 1000) : ''}`);
         err.status = response.status;
         err.body = bodyText;
-        error(`API 回傳錯誤 ${endpoint}`, err);
+        if (!silent) {
+          error(`API 回傳錯誤 ${endpoint}`, err);
+        }
         throw err;
       }
 
@@ -115,7 +118,7 @@ const API = {
       }
 
       try {
-        const data = await API.request('/characters');
+        const data = await API.request('/characters', { silent: true });
         API.characters._cache = data;
         return data;
       } catch (err) {
@@ -223,7 +226,7 @@ const API = {
       }
 
       try {
-        const data = await API.request('/leaderboard/all');
+        const data = await API.request('/leaderboard/all', { silent: true });
         API.leaderboard._cache.all = data;
         return data;
       } catch (err) {
