@@ -73,13 +73,25 @@ if (fs.existsSync(FRONTEND_PATH)) {
   app.use(express.static(FRONTEND_PATH));
 }
 
+// 安全載入路由，若缺少實作則不會讓伺服器直接崩潰
+const loadRoute = (routePath, mountPath) => {
+  try {
+    app.use(mountPath, require(routePath));
+  } catch (err) {
+    console.warn(`[WARN] 無法載入路由 ${routePath}: ${err.message}`);
+    app.use(mountPath, (req, res) => {
+      res.status(500).json({ error: '後端尚未完成或缺少路由實作' });
+    });
+  }
+};
+
 // 路由
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/characters', require('./routes/characters'));
-app.use('/api/questions', require('./routes/questions'));
-app.use('/api/votes', require('./routes/votes'));
-app.use('/api/leaderboard', require('./routes/leaderboard'));
-app.use('/api/cooldown', require('./routes/cooldown'));
+loadRoute('./routes/auth', '/api/auth');
+loadRoute('./routes/characters', '/api/characters');
+loadRoute('./routes/questions', '/api/questions');
+loadRoute('./routes/votes', '/api/votes');
+loadRoute('./routes/leaderboard', '/api/leaderboard');
+loadRoute('./routes/cooldown', '/api/cooldown');
 
 // 健康檢查
 app.get('/api/health', (req, res) => {

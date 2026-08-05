@@ -23,10 +23,45 @@ const UI = {
         this.loadLeaderboard('all');
       }
     }
+
+    this.updateStatusBanner();
   },
 
   updateUserInfo(name) {
     document.getElementById('user-name').textContent = name || '';
+  },
+
+  updateStatusBanner() {
+    const banner = document.getElementById('status-banner');
+    if (!banner) return;
+
+    const status = API.getDataSourceStatus();
+    const messages = [];
+
+    if (status.characters && status.characters !== 'remote' && status.characters !== 'unknown') {
+      if (status.characters === 'cache') {
+        messages.push('目前使用本地快取角色資料');
+      } else if (status.characters === 'static') {
+        messages.push('目前使用靜態備援角色資料');
+      }
+    }
+
+    if (status.leaderboard && status.leaderboard !== 'remote' && status.leaderboard !== 'unknown') {
+      if (status.leaderboard === 'cache') {
+        messages.push('目前使用本地快取排行榜資料');
+      } else if (status.leaderboard === 'derived') {
+        messages.push('目前使用後端角色資料推算排行榜');
+      } else if (status.leaderboard === 'static') {
+        messages.push('目前使用靜態備援排行榜資料');
+      }
+    }
+
+    if (messages.length > 0) {
+      banner.textContent = `注意：${messages.join('，')}。資料可能不是最新的。`;
+      banner.classList.remove('hidden');
+    } else {
+      banner.classList.add('hidden');
+    }
   },
 
   getCharacterImagePath(character) {
@@ -117,16 +152,18 @@ const UI = {
       }
 
       rankings.slice(0, 10).forEach((item, index) => {
+        const votes = item.vote_count ?? item.votes ?? 0;
         const element = document.createElement('div');
         element.className = 'leaderboard-item';
         element.innerHTML = `
           <div class="leaderboard-rank">#${index + 1}</div>
           <div class="leaderboard-name">${item.profession}</div>
           <div class="leaderboard-subname">${item.manor_name}</div>
-          <div class="leaderboard-votes">${item.vote_count} 票</div>
+          <div class="leaderboard-votes">${votes} 票</div>
         `;
         container.appendChild(element);
       });
+      this.updateStatusBanner();
     } catch (err) {
       error('載入排行榜預覽失敗', err);
     }
@@ -155,6 +192,7 @@ const UI = {
       }
 
       rankings.forEach((item, index) => {
+        const votes = item.vote_count ?? item.votes ?? 0;
         const element = document.createElement('div');
         element.className = 'ranking-item';
         element.innerHTML = `
@@ -163,10 +201,11 @@ const UI = {
             <div class="rank-name">${item.profession}</div>
             <div class="rank-subname">${item.manor_name}</div>
           </div>
-          <div class="rank-votes">${item.vote_count}</div>
+          <div class="rank-votes">${votes}</div>
         `;
         container.appendChild(element);
       });
+      this.updateStatusBanner();
     } catch (err) {
       error('????璁仃??', err);
     }
@@ -201,6 +240,7 @@ const UI = {
       });
 
       this.switchView('character-list');
+      this.updateStatusBanner();
     } catch (err) {
       error('載入角色列表失敗', err);
     }
@@ -215,7 +255,7 @@ const UI = {
       document.getElementById('detail-manor-name').textContent = character.manor_name;
       document.getElementById('detail-profession').textContent = character.profession;
       document.getElementById('detail-camp').textContent = character.camp;
-      document.getElementById('detail-votes').textContent = character.vote_count || 0;
+      document.getElementById('detail-votes').textContent = character.vote_count ?? character.votes ?? 0;
 
       const img = document.getElementById('character-img');
       // set placeholder while probing for actual image
@@ -289,6 +329,7 @@ const UI = {
 
       this.checkAndUpdateCooldown();
       this.switchView('character-detail');
+      this.updateStatusBanner();
     } catch (err) {
       error('??閫閰單?憭望?:', err);
     }

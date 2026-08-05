@@ -23,10 +23,45 @@ const UI = {
         this.loadLeaderboard('all');
       }
     }
+
+    this.updateStatusBanner();
   },
 
   updateUserInfo(name) {
     document.getElementById('user-name').textContent = name || '';
+  },
+
+  updateStatusBanner() {
+    const banner = document.getElementById('status-banner');
+    if (!banner) return;
+
+    const status = API.getDataSourceStatus();
+    const messages = [];
+
+    if (status.characters && status.characters !== 'remote' && status.characters !== 'unknown') {
+      if (status.characters === 'cache') {
+        messages.push('目前使用本地快取角色資料');
+      } else if (status.characters === 'static') {
+        messages.push('目前使用靜態備援角色資料');
+      }
+    }
+
+    if (status.leaderboard && status.leaderboard !== 'remote' && status.leaderboard !== 'unknown') {
+      if (status.leaderboard === 'cache') {
+        messages.push('目前使用本地快取排行榜資料');
+      } else if (status.leaderboard === 'derived') {
+        messages.push('目前使用後端角色資料推算排行榜');
+      } else if (status.leaderboard === 'static') {
+        messages.push('目前使用靜態備援排行榜資料');
+      }
+    }
+
+    if (messages.length > 0) {
+      banner.textContent = `注意：${messages.join('，')}。資料可能不是最新的。`;
+      banner.classList.remove('hidden');
+    } else {
+      banner.classList.add('hidden');
+    }
   },
 
   getCharacterImagePath(character) {
@@ -128,6 +163,7 @@ const UI = {
         `;
         container.appendChild(element);
       });
+      this.updateStatusBanner();
     } catch (err) {
       error('載入排行榜預覽失敗', err);
     }
@@ -169,6 +205,7 @@ const UI = {
         `;
         container.appendChild(element);
       });
+      this.updateStatusBanner();
     } catch (err) {
       error('????璁仃??', err);
     }
@@ -203,6 +240,7 @@ const UI = {
       });
 
       this.switchView('character-list');
+      this.updateStatusBanner();
     } catch (err) {
       error('載入角色列表失敗', err);
     }
@@ -291,6 +329,7 @@ const UI = {
 
       this.checkAndUpdateCooldown();
       this.switchView('character-detail');
+      this.updateStatusBanner();
     } catch (err) {
       error('??閫閰單?憭望?:', err);
     }

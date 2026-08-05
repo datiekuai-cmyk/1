@@ -67,9 +67,45 @@ const API = {
       }
     } catch (err) {
       if (!silent) {
-        error(`API 隢?憭望?: ${endpoint}`, err);
+        error(`API 請求失敗: ${endpoint}`, err);
       }
       throw err;
+    }
+  },
+
+  _cache: {
+    characters: null,
+    leaderboard: null
+  },
+  _source: {
+    characters: 'unknown',
+    leaderboard: 'unknown'
+  },
+  _cacheKeys: {
+    characters: 'cache_characters_v1',
+    leaderboard: 'cache_leaderboard_v1'
+  },
+  _setSource(type, source) {
+    API._source[type] = source;
+  },
+  getDataSourceStatus() {
+    return {
+      ...API._source
+    };
+  },
+  _loadCache(type) {
+    try {
+      const raw = localStorage.getItem(API._cacheKeys[type]);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  _saveCache(type, data) {
+    try {
+      localStorage.setItem(API._cacheKeys[type], JSON.stringify(data));
+    } catch (e) {
+      // ignore
     }
   },
 
@@ -122,10 +158,20 @@ const API = {
       try {
         const data = await API.request('/characters', { silent: true });
         API.characters._cache = data;
+        API._saveCache('characters', data);
+        API._setSource('characters', 'remote');
         return data;
       } catch (err) {
+        const cachedData = API._loadCache('characters');
+        if (cachedData) {
+          API.characters._cache = cachedData;
+          API._setSource('characters', 'cache');
+          return cachedData;
+        }
+
         const data = await API.loadLocalCharacters();
         API.characters._cache = data;
+        API._setSource('characters', 'static');
         return data;
       }
     },
@@ -191,6 +237,10 @@ const API = {
     async getFallbackFromCharacters() {
       try {
         const data = await API.characters.getAll();
+        const fallbackSource = API._source.characters === 'remote'
+          ? 'derived'
+          : API._source.characters;
+
         const buildList = (campName, campValue) => {
           const source = (data[campName] || []).map((char, index) => ({
             character_id: char.character_id,
@@ -217,9 +267,9 @@ const API = {
           return (a.profession || '').localeCompare(b.profession || '', 'zh-Hant');
         });
 
-        return { all, survivor, hunter };
+        return { all, survivor, hunter, source: fallbackSource };
       } catch (err) {
-        return { all: [], survivor: [], hunter: [] };
+        return { all: [], survivor: [], hunter: [], source: 'static' };
       }
     },
     async getAll(force = false) {
@@ -230,12 +280,22 @@ const API = {
       try {
         const data = await API.request('/leaderboard/all', { silent: true });
         API.leaderboard._cache.all = data;
+        API._saveCache('leaderboard', data);
+        API._setSource('leaderboard', 'remote');
         return data;
       } catch (err) {
+        const cachedData = API._loadCache('leaderboard');
+        if (cachedData) {
+          API.leaderboard._cache.all = cachedData;
+          API._setSource('leaderboard', 'cache');
+          return cachedData;
+        }
+
         const fallback = await API.leaderboard.getFallbackFromCharacters();
         API.leaderboard._cache.all = fallback.all;
         API.leaderboard._cache.survivor = fallback.survivor;
         API.leaderboard._cache.hunter = fallback.hunter;
+        API._setSource('leaderboard', fallback.source || 'static');
         return fallback.all;
       }
     },
