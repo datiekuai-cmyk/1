@@ -19,12 +19,46 @@ const API = {
         ...options,
         headers
       });
-      
+
+      // 如果不是 2xx，嘗試讀取回應內容以協助除錯
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        let bodyText = '';
+        try { bodyText = await response.text(); } catch (e) { /* ignore */ }
+        const err = new Error(`HTTP ${response.status}: ${bodyText ? bodyText.slice(0, 1000) : ''}`);
+        err.status = response.status;
+        err.body = bodyText;
+        error(`API 回傳錯誤 ${endpoint}`, err);
+        throw err;
       }
-      
-      return await response.json();
+
+      // 204 No Content -> 回傳 null
+      if (response.status === 204) return null;
+
+      const contentType = (response.headers.get && response.headers.get('content-type')) || '';
+
+      // 預期 JSON 回應時，嘗試解析；解析失敗時回退為純文字
+      if (contentType.includes('application/json')) {
+        try {
+          return await response.json();
+        } catch (parseErr) {
+          // 解析失敗時回退為 text 再嘗試 JSON.parse（若可能）
+          try {
+            const txt = await response.text();
+            try { return JSON.parse(txt); } catch (_) { return txt; }
+          } catch (e) {
+            error(`API 解析 JSON 失敗: ${endpoint}`, parseErr);
+            throw parseErr;
+          }
+        }
+      }
+
+      // 非 JSON 回應，回傳純文字內容
+      try {
+        return await response.text();
+      } catch (e) {
+        error(`API 讀取回應失敗: ${endpoint}`, e);
+        throw e;
+      }
     } catch (err) {
       error(`API 隢?憭望?: ${endpoint}`, err);
       throw err;
