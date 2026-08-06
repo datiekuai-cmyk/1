@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const STORAGE_DIR = path.join(__dirname, '..', 'storage');
-const CHARACTERS_PATH = path.join(__dirname, '..', 'backend_characters.json');
-const QUESTIONS_PATH = path.join(__dirname, '..', '..', 'data', 'question-bank.json');
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const BACKEND_DIR = path.resolve(REPO_ROOT, 'backend');
+const STORAGE_DIR = path.resolve(BACKEND_DIR, 'storage');
+const CHARACTERS_PATH = path.resolve(REPO_ROOT, 'backend_characters.json');
+const QUESTIONS_PATH = path.resolve(REPO_ROOT, 'data', 'question-bank.json');
 const VOTES_PATH = path.join(STORAGE_DIR, 'votes.json');
 const COOLDOWNS_PATH = path.join(STORAGE_DIR, 'cooldowns.json');
 
