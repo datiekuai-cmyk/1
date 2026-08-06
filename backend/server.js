@@ -38,8 +38,19 @@ if (!PHOTO_PATH) {
 }
 
 // 中間件
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'https://datiekuai-cmyk.github.io'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
   credentials: true
 }));
 app.use(express.json());
